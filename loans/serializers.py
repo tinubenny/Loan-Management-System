@@ -29,7 +29,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         role = validated_data.get('role', 'user')
         is_admin = role == "admin"
 
-        # ✅ Generate a default username if not provided
+        #  Generate a default username if not provided
         username = validated_data.get('username', validated_data['email'].split('@')[0])
 
         user = User.objects.create_user(
@@ -37,8 +37,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
             role=role,
-            is_staff=is_admin,  # ✅ Admins get staff privileges
-            is_superuser=is_admin,  # ✅ Admins get superuser privileges
+            is_staff=is_admin,  # Admins get staff privileges
+            is_superuser=is_admin,  # Admins get superuser privileges
         )
 
         user.is_verified = False
@@ -66,7 +66,7 @@ class LoanSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         loan = super().create(validated_data)
-        loan.calculate_loan_details()  # ✅ Automatically calculates interest & installment
+        loan.calculate_loan_details()  # Automatically calculates interest & installment
         return loan
 
     def get_remaining_balance(self, obj):

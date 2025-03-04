@@ -81,7 +81,7 @@ class Loan(models.Model):
         adjusted_total_payable = self.amount + interest_due
 
         self.total_payable = adjusted_total_payable
-        self.status = "paid"  # ✅ Update loan status to paid
+        self.status = "paid"  #  Update loan status to paid
         self.save()
         return adjusted_total_payable
 

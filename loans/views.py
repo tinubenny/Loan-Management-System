@@ -28,13 +28,13 @@ class VerifyOTPView(APIView):
         email = request.data.get('email')
         otp = request.data.get('otp')
 
-        # ✅ Use filter() instead of get() to handle multiple users with the same email
+        #  Use filter() instead of get() to handle multiple users with the same email
         users = User.objects.filter(email=email, otp=otp)
 
         if users.exists():
             for user in users:
-                user.is_verified = True  # ✅ Mark user as verified
-                user.otp = None  # ✅ Clear OTP after successful verification
+                user.is_verified = True  #  Mark user as verified
+                user.otp = None  #  Clear OTP after successful verification
                 user.save()
             return Response({"message": "OTP verified successfully!"}, status=status.HTTP_200_OK)
         else:
@@ -50,13 +50,13 @@ class LoginView(APIView):
             return Response({"error": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
 
         
-        if not user.is_verified:  # ✅ Prevent unverified users from logging in
+        if not user.is_verified:  # Prevent unverified users from logging in
             return Response({"error": "Please verify your OTP before logging in."}, status=status.HTTP_400_BAD_REQUEST)
         
         user = authenticate(username=user.username, password=password)
 
         if user is not None:
-            refresh = RefreshToken.for_user(user)  # ✅ Generate JWT Token
+            refresh = RefreshToken.for_user(user)  #  Generate JWT Token
             return Response({
                 "message": "Login successful!",
                 "access_token": str(refresh.access_token),
@@ -80,7 +80,7 @@ class LoanListView(APIView):
     def get(self, request):
        
         if request.user.role == "admin":
-            loans = Loan.objects.all()  # ✅ Admin sees all loans
+            loans = Loan.objects.all()  #  Admin sees all loans
         else:
             loans = Loan.objects.filter(user=request.user)  # Users see only their loans
 
@@ -92,7 +92,7 @@ class IsAdminUser(permissions.BasePermission):
 
 #  Admin Loan Approval/Rejection View
 class LoanUpdateView(APIView):
-    permission_classes = [IsAdminUser]  # ✅ Ensure only admins can approve/reject
+    permission_classes = [IsAdminUser]  #  Ensure only admins can approve/reject
 
     def put(self, request, loan_id):
         """Allow admins to approve or reject loans"""
