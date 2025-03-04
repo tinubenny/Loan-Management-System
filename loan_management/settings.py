@@ -14,6 +14,9 @@ from pathlib import Path
 import dj_database_url
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,11 +26,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-=)m1^m2ke3a^g1cgrogklzlrzna9ohmx5n4-so#3^g@l+yx8)u')
+SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'loan_management.onrender.com').split(',')
 
 AUTH_USER_MODEL = 'loans.CustomUser'
 
@@ -118,7 +121,8 @@ WSGI_APPLICATION = 'loan_management.wsgi.application'
 #         'PORT': '5432',
 #     }
 # }
-DATABASES = {
+print("DATABASE_URL", os.getenv('DATABASE_URL')),
+DATABASES = { 
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
