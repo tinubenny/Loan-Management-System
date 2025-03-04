@@ -1,17 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
-from .serializers import RegisterSerializer
+from .serializers import LoanForeclosureSerializer, RegisterSerializer
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import LoanSerializer
-from .models import Loan
+from loans.models import Loan, LoanRepayment
+from .serializers import LoanRepaymentSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAdminUser 
-
-
-
 
 
 # Create your views here.
@@ -73,32 +71,35 @@ class LoanCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        loan = serializer.save(user=self.request.user)
+        loan.calculate_loan_details()
 
 class LoanListView(APIView):
-    permission_classes = [IsAuthenticated]  # ✅ Only authenticated users can access
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
     def get(self, request):
-        # ✅ If the user is an admin, show all loans
+       
         if request.user.role == "admin":
-            loans = Loan.objects.all()  # ✅ Show all loans
+            loans = Loan.objects.all()  # ✅ Admin sees all loans
         else:
-            loans = Loan.objects.filter(user=request.user)  # ✅ Show only the user's loans
+            loans = Loan.objects.filter(user=request.user)  # Users see only their loans
 
         serializer = LoanSerializer(loans, many=True)
         return Response(serializer.data)
+class IsAdminUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == "admin"
 
-    def get_queryset(self):
-        return Loan.objects.filter(user=self.request.user)
-    
+#  Admin Loan Approval/Rejection View
 class LoanUpdateView(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdminUser]  # ✅ Ensure only admins can approve/reject
 
-    def post(self, request, loan_id):
+    def put(self, request, loan_id):
+        """Allow admins to approve or reject loans"""
         try:
             loan = Loan.objects.get(id=loan_id)
-            status = request.data.get('status')
 
+            status = request.data.get('status')
             if status not in ['approved', 'rejected']:
                 return Response({"error": "Invalid status"}, status=400)
 
@@ -107,5 +108,41 @@ class LoanUpdateView(APIView):
             return Response({"message": f"Loan {status} successfully!"})
 
         except Loan.DoesNotExist:
-            return Response({"error": "Loan not found"}, status=404) 
-    
+            return Response({"error": "Loan not found"}, status=404)
+
+class LoanRepaymentView(generics.CreateAPIView):
+    queryset = LoanRepayment.objects.all()
+    serializer_class = LoanRepaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        loan = serializer.validated_data['loan']
+        
+        # Ensure user can only repay their own loans
+        if loan.user != self.request.user:
+            return Response({"error": "You can only repay your own loans."}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer.save(user=self.request.user)
+class LoanForeclosureView(generics.UpdateAPIView):
+    queryset = Loan.objects.all()
+    serializer_class = LoanForeclosureSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        """Allow users to foreclose their own loans only"""
+        loan = self.get_object()
+
+        if loan.user != request.user:
+            return Response({"error": "You can only foreclose your own loans."}, status=status.HTTP_403_FORBIDDEN)
+
+        if loan.status == "paid":
+            return Response({"error": "This loan is already paid."}, status=status.HTTP_400_BAD_REQUEST)
+
+        adjusted_total = loan.foreclose_loan()  # Auto-adjust interest for early closure
+        return Response({
+            "message": "Loan foreclosed successfully!",
+            "adjusted_total_payable": adjusted_total
+        })
+class IsAdminUser(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == "admin"

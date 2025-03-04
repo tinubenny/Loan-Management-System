@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, VerifyOTPView, LoginView, LoanCreateView, LoanListView, LoanUpdateView
+from .views import LoanForeclosureView, LoanRepaymentView, RegisterView, VerifyOTPView, LoginView, LoanCreateView, LoanListView, LoanUpdateView
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'), 
@@ -12,4 +12,7 @@ urlpatterns = [
     path('loans/apply/', LoanCreateView.as_view(), name='loan-apply'),  # ✅ Apply for a loan
     path('loans/', LoanListView.as_view(), name='loan-list'),  # ✅ View user’s loans
     path('loans/update/<int:loan_id>/', LoanUpdateView.as_view(), name='loan-update'),  # ✅ Approve/reject loans (admin)
+    path('loans/repay/', LoanRepaymentView.as_view(), name='loan-repay'),
+    path('loans/foreclose/<int:pk>/', LoanForeclosureView.as_view(), name='loan-foreclose'),
 ]
+
