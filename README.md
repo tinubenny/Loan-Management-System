@@ -53,7 +53,7 @@ Deployment: Render
 
 📌 Installation & Setup
 🔹 Step 1: Clone the Repository
-git clone https://github.com/your-github-username/loan-management.git
+git clone https://github.com/tinubenny/Loan-Management-System.git
 cd loan-management
 
 🔹 Step 2: Create a Virtual Environment & Install Dependencies
@@ -68,8 +68,8 @@ Create a .env file in the project directory:
 SECRET_KEY=your_secret_key
 DEBUG=True
 
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_USER=your-tinujosephc@gmail.com
+EMAIL_PASS=fyua pudw fjee xfay
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
@@ -132,7 +132,7 @@ git init
 git add .
 git commit -m "Initial Commit"
 git branch -M main
-git remote add origin https://github.com/your-username/loan-management.git
+git remote add origin https://github.com/tinubenny/Loan-Management-System.git
 git push -u origin main
 ------------------------------------------------------------------
 🔹 Step 2: Deploy on Render
@@ -143,8 +143,8 @@ Set Start Command:
 gunicorn loan_management.wsgi:application
 Add Environment Variables in Render:
 
-DATABASE_URL=<Render PostgreSQL URL>
-SECRET_KEY=<your-secret-key>
+DATABASE_URL=postgresql://loan_db_nyr8_user:hMQMDHPXdHj0nZnu8ohVxyWBpyx93eQQ@dpg-cv3n6atds78s73dv6ak0-a/loan_db_nyr8
+SECRET_KEY=B-iPuW3slMsQHP3DC_cP1c1j8WPcaK8w7LXNdjHg-iLD_GElSZquUhg1HDH1etE0Pz8
 DEBUG=False
 
 Click Deploy 🚀
